@@ -1,0 +1,53 @@
+#!/bin/bash -e
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+BASE_DIR=$(dirname $DIR)
+DOWNLOAD_DIR=$BASE_DIR/download
+DEPLOY_DIR=$BASE_DIR/deploy
+CONF_DIR=$BASE_DIR/conf
+
+HADOOP_VERSION=2.6.1
+HADOOP_NAME=hadoop-${HADOOP_VERSION}
+FILE_NAME=${HADOOP_NAME}.tar.gz
+
+MIRROR=`curl -sSL https://www.apache.org/dyn/closer.cgi\?as_json\=1 | grep preferred|awk -F'"' '{print $(NF-1)}'` 
+HADOOP_DOWNLOAD=$MIRROR/hadoop/common/$HADOOP_NAME/$FILE_NAME
+
+
+download(){
+    if [ ! -f $DOWNLOAD_DIR/$FILE_NAME ];then
+        mkdir -p $DOWNLOAD_DIR
+        echo "Downloading ..."
+        curl $HADOOP_DOWNLOAD > $DOWNLOAD_DIR/$FILE_NAME.tmp
+        mv $DOWNLOAD_DIR/$FILE_NAME.tmp $DOWNLOAD_DIR/$FILE_NAME
+    fi
+}
+
+
+install(){
+    if [ ! -d $DEPLOY_DIR/$HADOOP_NAME ];then
+        echo "Installing ..."
+        mkdir -p $DEPLOY_DIR
+        tar -xf $DOWNLOAD_DIR/$FILE_NAME -C $DEPLOY_DIR 
+    fi
+}
+
+conf(){
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    chmod 0600 ~/.ssh/authorized_keys
+
+    cp -f $CONF_DIR/*  $DEPLOY_DIR/$HADOOP_NAME/etc/hadoop/
+}
+
+start(){
+    HADOOP_PATH=$DEPLOY_DIR/$HADOOP_NAME
+    $HADOOP_PATH/bin/hdfs namenode -format 
+
+    $HADOOP_PATH/sbin/start-all.sh
+}
+
+download
+install
+conf
+start
