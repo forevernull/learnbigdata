@@ -12,5 +12,3 @@ RUN git clone https://github.com/forevernull/learnbigdata.git ~/learnbigdata && 
 
 
 EXPOSE 8088 9000 9870
-
-CMD ["~/learnbigdata/hadoop/bin/bootstrap", "start"]
