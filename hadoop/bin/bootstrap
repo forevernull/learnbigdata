@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+source ~/.bashrc
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE_DIR=$(dirname $DIR)
@@ -18,7 +19,8 @@ download(){
     if [ ! -f $DOWNLOAD_DIR/$FILE_NAME ];then
         mkdir -p $DOWNLOAD_DIR
         echo "Downloading ..."
-        curl $HADOOP_DOWNLOAD > $DOWNLOAD_DIR/$FILE_NAME.tmp
+        echo $HADOOP_DOWNLOAD
+        curl "$HADOOP_DOWNLOAD" > "$DOWNLOAD_DIR/$FILE_NAME.tmp"
         mv $DOWNLOAD_DIR/$FILE_NAME.tmp $DOWNLOAD_DIR/$FILE_NAME
     fi
 }
@@ -38,16 +40,26 @@ conf(){
     chmod 0600 ~/.ssh/authorized_keys
 
     cp -f $CONF_DIR/*  $DEPLOY_DIR/$HADOOP_NAME/etc/hadoop/
+    
+    HADOOP_HOME=$DEPLOY_DIR/$HADOOP_NAME
+    echo "HADOOP_HOME=$HADOOP_HOME" >> ~/.bashrc
+    echo "PATH=$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$PATH" >> ~/.bashrc
 }
 
 start(){
+    /usr/sbin/sshd
+
     HADOOP_PATH=$DEPLOY_DIR/$HADOOP_NAME
     $HADOOP_PATH/bin/hdfs namenode -format 
 
     $HADOOP_PATH/sbin/start-all.sh
 }
 
-download
-install
-conf
-start
+if [ "$1" = "start"]; then
+    start
+else
+    download
+    install
+    conf
+    start
+fi
