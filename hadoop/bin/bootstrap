@@ -55,7 +55,7 @@ start(){
     $HADOOP_PATH/sbin/start-all.sh
 }
 
-if [ "$1" = "start"]; then
+if [ "$1" = "start" ]; then
     start
 else
     download
