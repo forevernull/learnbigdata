@@ -35,6 +35,7 @@ install(){
 }
 
 conf(){
+    echo 'StrictHostKeyChecking no' >> ~/.ssh/config 
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
     cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
     chmod 0600 ~/.ssh/authorized_keys
@@ -50,7 +51,7 @@ start(){
     /usr/sbin/sshd
 
     HADOOP_PATH=$DEPLOY_DIR/$HADOOP_NAME
-    $HADOOP_PATH/bin/hdfs namenode -format 
+    echo 'Y'|$HADOOP_PATH/bin/hdfs namenode -format 
 
     $HADOOP_PATH/sbin/start-all.sh
 }
@@ -61,5 +62,4 @@ else
     download
     install
     conf
-    start
 fi
