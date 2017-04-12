@@ -36,8 +36,8 @@ install(){
 
 conf(){
     
-    if [ !-f  ~/.ssh/config ]; then
-        touch ~/.ssh/config
+    if [ ! -f  "/root/.ssh/config" ]; then
+        touch "/root/.ssh/config"
     fi
     echo 'StrictHostKeyChecking no' >> ~/.ssh/config 
     ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
