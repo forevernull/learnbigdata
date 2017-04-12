@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ ! -f  ~/.ssh/config ]; then
+    mkdir ~/.ssh
+    echo 'StrictHostKeyChecking no' >> ~/.ssh/config
+fi
+# Setup passphraseless ssh
+if [ ! -f ~/.ssh/id_rsa ]; then
+    ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+    cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+    chmod 0600 ~/.ssh/authorized_keys
+fi
+
+
+# start SSH server
+/usr/sbin/sshd
+
+# format namenode
+echo 'Y'|hdfs namenode -format
+
+# start hdfs & yarn
+start-dfs.sh
+start-yarn.sh
